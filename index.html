@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAH DIGITAL MARKET</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#f3f6fc;
+ color:#17243b;
+}
+header{
+ background:#0755c9;
+ color:white;
+ padding:22px 6%;
+}
+header h1{margin:0;font-size:27px}
+header p{margin:7px 0 0}
+nav{
+ background:white;
+ padding:15px 6%;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ box-shadow:0 2px 8px #ddd;
+}
+nav a{
+ color:#0755c9;
+ text-decoration:none;
+ font-weight:bold;
+}
+.hero{
+ background:linear-gradient(120deg,#0755c9,#3989f5);
+ color:white;
+ padding:55px 7%;
+ text-align:center;
+}
+.hero h2{font-size:34px;margin:0 0 12px}
+.hero p{font-size:17px}
+.search{
+ width:90%;
+ max-width:550px;
+ padding:15px;
+ border:0;
+ border-radius:9px;
+ margin-top:15px;
+ font-size:16px;
+}
+main{padding:30px 6%}
+h2.section{color:#0755c9}
+.categories{
+ display:flex;
+ flex-wrap:wrap;
+ gap:10px;
+ margin:20px 0;
+}
+.categories button{
+ border:1px solid #0755c9;
+ background:white;
+ color:#0755c9;
+ padding:11px 16px;
+ border-radius:20px;
+ cursor:pointer;
+}
+.categories button.active,
+.categories button:hover{
+ background:#0755c9;
+ color:white;
+}
+.products{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+ gap:20px;
+}
+.product{
+ background:white;
+ border-radius:13px;
+ padding:18px;
+ box-shadow:0 3px 12px #dce3ee;
+}
+.product .photo{
+ height:125px;
+ display:grid;
+ place-items:center;
+ background:#edf3ff;
+ border-radius:10px;
+ font-size:55px;
+}
+.product h3{margin-bottom:8px}
+.price{
+ color:#0755c9;
+ font-weight:bold;
+ font-size:19px;
+}
+.product button,.order{
+ width:100%;
+ border:0;
+ background:#0755c9;
+ color:white;
+ padding:12px;
+ border-radius:8px;
+ cursor:pointer;
+ margin-top:10px;
+ font-weight:bold;
+}
+.product button:hover,.order:hover{background:#003d99}
+.cart{
+ margin-top:35px;
+ background:white;
+ padding:22px;
+ border-radius:12px;
+}
+footer{
+ margin-top:40px;
+ background:#10284b;
+ color:white;
+ padding:30px;
+ text-align:center;
+}
+small{color:#65738b}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>BAH DIGITAL MARKET</h1>
+<p>Le marché numérique de demain, en Guinée.</p>
+</header>
+
+<nav>
+<a href="#">Accueil</a>
+<a href="#produits">Produits</a>
+<a href="#panier">Mon panier 🛒</a>
+</nav>
+
+<section class="hero">
+<h2>Bienvenue chez BAH DIGITAL MARKET</h2>
+<p>Achetez et découvrez des produits depuis votre téléphone.</p>
+<input class="search" id="search"
+placeholder="Rechercher un produit..."
+oninput="filterProducts()">
+</section>
+
+<main>
+
+<h2 class="section">Nos catégories</h2>
+
+<div class="categories">
+<button class="active" onclick="chooseCategory('Tous',this)">Tous</button>
+<button onclick="chooseCategory('Électronique',this)">Électronique</button>
+<button onclick="chooseCategory('Mode',this)">Mode</button>
+<button onclick="chooseCategory('Informatique',this)">Informatique</button>
+<button onclick="chooseCategory('Accessoires',this)">Accessoires</button>
+</div>
+
+<h2 class="section" id="produits">Nos produits</h2>
+
+<div class="products" id="productList"></div>
+
+<section class="cart" id="panier">
+<h2>🛒 Mon panier</h2>
+<div id="cartItems">Votre panier est vide.</div>
+<h3 id="total">Total : 0 GNF</h3>
+<button class="order" onclick="orderNow()">
+Passer une commande
+</button>
+</section>
+
+</main>
+
+<footer>
+<h2>BAH DIGITAL MARKET</h2>
+<p>Une initiative numérique de Boubacar Bah.</p>
+<p>Guinée-Conakry</p>
+<small>Version de démonstration — 2026</small>
+</footer>
+
+<script>
+const products=[
+{name:"Écouteurs Bluetooth",price:150000,category:"Électronique",icon:"🎧"},
+{name:"Montre connectée",price:250000,category:"Accessoires",icon:"⌚"},
+{name:"Téléphone portable",price:1200000,category:"Électronique",icon:"📱"},
+{name:"Sac moderne",price:180000,category:"Mode",icon:"🎒"},
+{name:"Ordinateur portable",price:3500000,category:"Informatique",icon:"💻"},
+{name:"Clavier USB",price:120000,category:"Informatique",icon:"⌨️"},
+{name:"Lunettes",price:90000,category:"Mode",icon:"🕶️"},
+{name:"Chargeur USB",price:75000,category:"Accessoires",icon:"🔌"}
+];
+
+let cart=[];
+let currentCategory="Tous";
+
+function formatPrice(price){
+return price.toLocaleString("fr-FR")+" GNF";
+}
+
+function displayProducts(){
+const list=document.getElementById("productList");
+const search=document.getElementById("search").value.toLowerCase();
+list.innerHTML="";
+
+const filtered=products.filter(p=>
+(currentCategory==="Tous"||p.category===currentCategory)&&
+p.name.toLowerCase().includes(search)
+);
+
+filtered.forEach(p=>{
+const index=products.indexOf(p);
+list.innerHTML+=`
+<div class="product">
+<div class="photo">${p.icon}</div>
+<h3>${p.name}</h3>
+<p>${p.category}</p>
+<p class="price">${formatPrice(p.price)}</p>
+<button onclick="addToCart(${index})">Ajouter au panier</button>
+</div>`;
+});
+
+if(filtered.length===0){
+list.innerHTML="<p>Aucun produit trouvé.</p>";
+}
+}
+
+function filterProducts(){
+displayProducts();
+}
+
+function chooseCategory(category,button){
+currentCategory=category;
+document.querySelectorAll(".categories button")
+.forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+displayProducts();
+}
+
+function addToCart(index){
+cart.push(products[index]);
+displayCart();
+}
+
+function displayCart(){
+const area=document.getElementById("cartItems");
+if(cart.length===0){
+area.innerHTML="Votre panier est vide.";
+}else{
+area.innerHTML=cart.map((p,i)=>
+`<p>${p.icon} ${p.name} — ${formatPrice(p.price)}
+<button onclick="removeItem(${i})">Retirer</button></p>`
+).join("");
+}
+const total=cart.reduce((sum,p)=>sum+p.price,0);
+document.getElementById("total").textContent=
+"Total : "+formatPrice(total);
+}
+
+function removeItem(index){
+cart.splice(index,1);
+displayCart();
+}
+
+function orderNow(){
+if(cart.length===0){
+alert("Ajoutez d'abord un produit au panier.");
+return;
+}
+alert("Votre panier est prêt ! Le contact vendeur et le système de commande seront configurés dans la prochaine étape.");
+}
+
+displayProducts();
+</script>
+
+</body>
+</html>
